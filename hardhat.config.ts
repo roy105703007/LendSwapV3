@@ -3,8 +3,20 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 
+import * as dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
+
+const signerAccounts = process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [];
+
 export default {
   networks: {
+    "arbitrum-sepolia": {
+      url: `https://sepolia-rollup.arbitrum.io/rpc/`,
+      chainId: 421614,
+      accounts: signerAccounts,
+    },
     hardhat: {
       allowUnlimitedContractSize: false,
     },
@@ -46,9 +58,19 @@ export default {
     },
   },
   etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      "arbitrum-sepolia": process.env.ARBISCAN_API_KEY || "",
+    },
+    customChains: [
+      {
+        network: "arbitrum-sepolia",
+        chainId: 421614, // Replace with the correct chainId for the "opbnb" network
+        urls: {
+          apiURL: "https://api-sepolia.arbiscan.io/api",
+          browserURL: "https://sepolia.arbiscan.io/",
+        },
+      },
+    ],
   },
   solidity: {
     version: '0.7.6',
