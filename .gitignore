@@ -5,4 +5,7 @@ node_modules/
 typechain/
 .env
 yarn.lock
-packkage-lock.json
+package-lock.json
+out/
+lib/
+yarn.lock
