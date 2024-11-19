@@ -61,6 +61,7 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback {
 
         // Add liquidity to the pool
         (uint256 amount0, uint256 amount1) = pool.mint(address(this), tickLower, tickUpper, liquidity, '');
+        getTokenBalances();
 
         // Verify the amounts of token0 and token1 added to the pool
         assertGt(amount0, 0, 'Amount0 should be greater than 0');
@@ -71,15 +72,18 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback {
         // Remove a portion of liquidity from the pool
         uint128 liquidityToRemove = liquidity / 2;
         (uint256 amount0Burned, uint256 amount1Burned) = pool.burn(tickLower, tickUpper, liquidityToRemove);
-
-        // Collect tokens back to this contract
-        pool.collect(address(this), tickLower, tickUpper, type(uint128).max, type(uint128).max);
+        console.log('After burn');
+        getTokenBalances();
 
         // Verify the amounts of token0 and token1 removed from the pool
         assertGt(amount0Burned, 0, 'Amount0 burned should be greater than 0');
         assertGt(amount1Burned, 0, 'Amount1 burned should be greater than 0');
         console.log('Amount0 burned:', amount0Burned);
         console.log('Amount1 burned:', amount1Burned);
+
+        // Collect tokens back to this contract
+        pool.collect(address(this), tickLower, tickUpper, type(uint128).max, type(uint128).max);
+        console.log('After collect');
 
         getPoolState();
         getTokenBalances();
