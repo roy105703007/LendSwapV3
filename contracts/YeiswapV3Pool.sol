@@ -26,6 +26,7 @@ import './interfaces/IERC20Minimal.sol';
 import './interfaces/callback/IUniswapV3MintCallback.sol';
 import './interfaces/callback/IUniswapV3SwapCallback.sol';
 import './interfaces/callback/IUniswapV3FlashCallback.sol';
+import './Vault.sol';
 
 contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
     using LowGasSafeMath for uint256;
@@ -114,6 +115,10 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         _;
     }
 
+    // Add a Vault instance variable:
+    Vault public vault;
+
+    // Initialize the Vault in the constructor
     constructor() {
         int24 _tickSpacing;
         (factory, token0, token1, fee, _tickSpacing) = IUniswapV3PoolDeployer(msg.sender).parameters();
@@ -289,6 +294,14 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         emit Initialize(sqrtPriceX96, tick);
     }
 
+    /// @notice Sets the Vault contract address
+    /// @param _vault The address of the Vault contract
+    /// @dev Can only be called once by the factory owner
+    function setVault(address payable _vault) external {
+        require(_vault != address(0), 'Vault address cannot be zero');
+        vault = Vault(_vault);
+    }
+
     struct ModifyPositionParams {
         // the address that owns the position
         address owner;
@@ -461,6 +474,7 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         bytes calldata data
     ) external override lock returns (uint256 amount0, uint256 amount1) {
         require(amount > 0);
+        require(address(vault) != address(0), 'Vault not set');
         (, int256 amount0Int, int256 amount1Int) = _modifyPosition(
             ModifyPositionParams({
                 owner: recipient,
@@ -480,6 +494,14 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         IUniswapV3MintCallback(msg.sender).uniswapV3MintCallback(amount0, amount1, data);
         if (amount0 > 0) require(balance0Before.add(amount0) <= balance0(), 'M0');
         if (amount1 > 0) require(balance1Before.add(amount1) <= balance1(), 'M1');
+
+        // MODIFIED: Transfer tokens to the Vault after minting
+        if (amount0 > 0) {
+            IERC20Minimal(token0).transfer(address(vault), amount0);
+        }
+        if (amount1 > 0) {
+            IERC20Minimal(token1).transfer(address(vault), amount1);
+        }
 
         emit Mint(msg.sender, recipient, tickLower, tickUpper, amount, amount0, amount1);
     }
@@ -517,6 +539,7 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
         int24 tickUpper,
         uint128 amount
     ) external override lock returns (uint256 amount0, uint256 amount1) {
+        require(address(vault) != address(0), 'Vault not set');
         (Position.Info storage position, int256 amount0Int, int256 amount1Int) = _modifyPosition(
             ModifyPositionParams({
                 owner: msg.sender,
@@ -528,6 +551,14 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
 
         amount0 = uint256(-amount0Int);
         amount1 = uint256(-amount1Int);
+
+        // MODIFIED: Withdraw tokens from the Vault before burning
+        if (amount0 > 0) {
+            vault.withdrawToken(token0, address(this), amount0);
+        }
+        if (amount1 > 0) {
+            vault.withdrawToken(token1, address(this), amount1);
+        }
 
         if (amount0 > 0 || amount1 > 0) {
             (position.tokensOwed0, position.tokensOwed1) = (

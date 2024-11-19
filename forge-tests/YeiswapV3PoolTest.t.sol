@@ -6,13 +6,15 @@ import 'forge-std/Test.sol';
 import '../contracts/YeiswapV3Factory.sol';
 import '../contracts/YeiswapV3Pool.sol';
 import '../contracts/MockERC20.sol';
-// help me import 'TickMath.sol'
 import '../contracts/libraries/TickMath.sol';
+import '../contracts/Vault.sol';
+
 contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback {
     YeiswapV3Factory public factory;
     YeiswapV3Pool public pool;
     MockERC20 public tokenA;
     MockERC20 public tokenB;
+    Vault public vault;
 
     uint24 public constant FEE = 3000; // 0.3%
     uint160 public constant INITIAL_SQRT_PRICE_X96 = 79228162514264337593543950336; // sqrt(1) * 2^96
@@ -21,6 +23,10 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback {
     function setUp() public {
         // Deploy the YeiswapV3Factory contract
         factory = new YeiswapV3Factory();
+
+        // Deploy the Vault contract
+        vault = new Vault();
+        // vault.addToWhitelist(address(this));
 
         // Deploy MockERC20 tokens
         tokenA = new MockERC20('TokenA', 'TKA', INITIAL_SUPPLY);
@@ -32,6 +38,9 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback {
 
         // Initialize the pool with the starting sqrt price
         pool.initialize(INITIAL_SQRT_PRICE_X96);
+
+        // Set vault address in the pool
+        pool.setVault(address(vault));
 
         // Approve the pool to transfer tokens on behalf of this contract
         tokenA.approve(address(pool), type(uint256).max);

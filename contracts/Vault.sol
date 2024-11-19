@@ -1,21 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
-
-interface IERC20 {
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-    function transfer(address recipient, uint256 amount) external returns (bool);
-}
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 
 contract Vault {
     // Mapping for whitelisted addresses
     mapping(address => bool) public whitelist;
     address public owner;
-
-    // Modifier: only whitelisted addresses can call
-    modifier onlyWhitelisted() {
-        require(whitelist[msg.sender], 'Not authorized');
-        _;
-    }
 
     // Modifier: only the contract owner can call
     modifier onlyOwner() {
@@ -34,7 +24,7 @@ contract Vault {
     /// @notice Deposit ERC20 tokens
     /// @param token Address of the token to deposit
     /// @param amount Amount of tokens to deposit
-    function depositToken(address token, uint256 amount) external onlyWhitelisted {
+    function depositToken(address token, uint256 amount) external {
         require(amount > 0, 'Invalid amount');
         require(IERC20(token).transferFrom(msg.sender, address(this), amount), 'Deposit failed');
     }
@@ -43,21 +33,21 @@ contract Vault {
     /// @param token Address of the token to withdraw
     /// @param recipient Address to receive the tokens
     /// @param amount Amount of tokens to withdraw
-    function withdrawToken(address token, address recipient, uint256 amount) external onlyWhitelisted {
+    function withdrawToken(address token, address recipient, uint256 amount) external {
         require(amount > 0, 'Invalid amount');
         require(recipient != address(0), 'Invalid recipient');
         require(IERC20(token).transfer(recipient, amount), 'Withdraw failed');
     }
 
     /// @notice Deposit ETH
-    function depositETH() external payable onlyWhitelisted {
+    function depositETH() external payable {
         require(msg.value > 0, 'No ETH sent');
     }
 
     /// @notice Withdraw ETH
     /// @param recipient Address to receive the ETH
     /// @param amount Amount of ETH to withdraw
-    function withdrawETH(address recipient, uint256 amount) external onlyWhitelisted {
+    function withdrawETH(address recipient, uint256 amount) external {
         require(amount > 0, 'Invalid amount');
         require(recipient != address(0), 'Invalid recipient');
         require(address(this).balance >= amount, 'Insufficient ETH balance');
@@ -65,19 +55,19 @@ contract Vault {
         require(success, 'Withdraw failed');
     }
 
-    /// @notice Add an address to the whitelist
-    /// @param addr Address to add to the whitelist
-    function addToWhitelist(address addr) external onlyOwner {
-        require(addr != address(0), 'Invalid address');
-        whitelist[addr] = true;
-    }
+    // /// @notice Add an address to the whitelist
+    // /// @param addr Address to add to the whitelist
+    // function addToWhitelist(address addr) external onlyOwner {
+    //     require(addr != address(0), 'Invalid address');
+    //     whitelist[addr] = true;
+    // }
 
-    /// @notice Remove an address from the whitelist
-    /// @param addr Address to remove from the whitelist
-    function removeFromWhitelist(address addr) external onlyOwner {
-        require(addr != address(0), 'Invalid address');
-        whitelist[addr] = false;
-    }
+    // /// @notice Remove an address from the whitelist
+    // /// @param addr Address to remove from the whitelist
+    // function removeFromWhitelist(address addr) external onlyOwner {
+    //     require(addr != address(0), 'Invalid address');
+    //     whitelist[addr] = false;
+    // }
 
     /// @notice Update the contract owner
     /// @param newOwner Address of the new owner
