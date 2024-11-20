@@ -794,12 +794,20 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
 
         // do the transfers and collect payment
         if (zeroForOne) {
+            // *modify* Withdraw token1 from the Vault
+            uint256 requireToken1 = amount1 < 0 ? uint256(-amount1) : uint256(amount1);
+            vault.withdrawToken(token1, address(this), requireToken1); // Withdraw token1 from the Vault
+            //
             if (amount1 < 0) TransferHelper.safeTransfer(token1, recipient, uint256(-amount1));
 
             uint256 balance0Before = balance0();
             IUniswapV3SwapCallback(msg.sender).uniswapV3SwapCallback(amount0, amount1, data);
             require(balance0Before.add(uint256(amount0)) <= balance0(), 'IIA');
         } else {
+            // *modify* Withdraw from Vault
+            uint256 requiredToken0 = amount0 < 0 ? uint256(-amount0) : uint256(amount0);
+            vault.withdrawToken(token0, address(this), requiredToken0); // Withdraw token0 from the Vault
+            //
             if (amount0 < 0) TransferHelper.safeTransfer(token0, recipient, uint256(-amount0));
 
             uint256 balance1Before = balance1();
