@@ -52,7 +52,7 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
 
     function testAddAndRemoveLiquidity() public {
         getPoolState();
-        getTokenBalances();
+        getTokenBalancesInPool();
         // Define the tick range for liquidity
         int24 tickLower = -600;
         int24 tickUpper = 600;
@@ -64,7 +64,7 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
 
         // Add liquidity to the pool
         (uint256 amount0, uint256 amount1) = pool.mint(address(this), tickLower, tickUpper, liquidity, '');
-        getTokenBalances();
+        getTokenBalancesInPool();
 
         // Verify the amounts of token0 and token1 added to the pool
         assertGt(amount0, 0, 'Amount0 should be greater than 0');
@@ -76,7 +76,7 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         uint128 liquidityToRemove = liquidity / 2;
         (uint256 amount0Burned, uint256 amount1Burned) = pool.burn(tickLower, tickUpper, liquidityToRemove);
         console.log('After burn');
-        getTokenBalances();
+        getTokenBalancesInPool();
 
         // Verify the amounts of token0 and token1 removed from the pool
         assertGt(amount0Burned, 0, 'Amount0 burned should be greater than 0');
@@ -89,7 +89,7 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         console.log('After collect');
 
         getPoolState();
-        getTokenBalances();
+        getTokenBalancesInPool();
     }
 
     function testSwap() public {
@@ -101,7 +101,7 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         (uint256 amount0Added, uint256 amount1Added) = pool.mint(address(this), tickLower, tickUpper, liquidity, '');
         console.log('Liquidity added. Amount0:', amount0Added, 'Amount1:', amount1Added);
 
-        getTokenBalances();
+        getTokenBalancesInPool();
 
         // Step 2: Perform a swap
         uint256 amountSpecified = 1000; // Swap 1000 tokenA for tokenB
@@ -109,7 +109,7 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
 
         console.log('Before swap:');
         getPoolState();
-        getTokenBalances();
+        getTokenBalancesInPool();
 
         uint256 beforeSwapTokenABalance = tokenA.balanceOf(address(this));
         (int256 amount0, int256 amount1) = pool.swap(
@@ -121,12 +121,12 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         );
 
         console.log('After swap:');
-        console.log('Amount0:', uint256(amount0 < 0 ? -amount0 : amount0));
-        console.log('Amount1:', uint256(amount1 < 0 ? -amount1 : amount1));
+        console.log('The delta of the balance of token0 of the pool:', amount0);
+        console.log('The delta of the balance of token1 of the pool', amount1);
 
         // Step 3: Verify balances and state after swap
         getPoolState();
-        getTokenBalances();
+        getTokenBalancesInPool();
 
         assertGt(uint256(amount1), 0, 'Swap should result in a positive amount1');
         assertEq(
@@ -148,7 +148,7 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         console.log('Current liquidity:', uint256(liquidity));
     }
 
-    function getTokenBalances() public view returns (uint256 balanceTokenA, uint256 balanceTokenB) {
+    function getTokenBalancesInPool() public view returns (uint256 balanceTokenA, uint256 balanceTokenB) {
         // Retrieve token balances in the pool
         balanceTokenA = tokenA.balanceOf(address(pool));
         balanceTokenB = tokenB.balanceOf(address(pool));
