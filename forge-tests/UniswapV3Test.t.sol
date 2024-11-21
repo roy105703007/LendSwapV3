@@ -8,7 +8,7 @@ import '../contracts/UniswapV3Pool.sol';
 import '../contracts/MockERC20.sol';
 import '../contracts/libraries/TickMath.sol';
 
-contract UniswapV3PoolTest is Test, IUniswapV3MintCallback {
+contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallback {
     UniswapV3Factory public factory;
     UniswapV3Pool public pool;
     MockERC20 public tokenA;
@@ -23,8 +23,20 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback {
         factory = new UniswapV3Factory();
 
         // Deploy MockERC20 tokens
-        tokenA = new MockERC20('TokenA', 'TKA', INITIAL_SUPPLY);
-        tokenB = new MockERC20('TokenB', 'TKB', INITIAL_SUPPLY);
+        MockERC20 tempTokenA = new MockERC20('TokenA', 'TKA', INITIAL_SUPPLY);
+        MockERC20 tempTokenB = new MockERC20('TokenB', 'TKB', INITIAL_SUPPLY);
+
+        // Sort tokens to determine token0 and token1
+        if (address(tempTokenA) < address(tempTokenB)) {
+            tokenA = tempTokenA;
+            tokenB = tempTokenB;
+        } else {
+            tokenA = tempTokenB;
+            tokenB = tempTokenA;
+        }
+
+        console.log('Token0 address:', address(tokenA));
+        console.log('Token1 address:', address(tokenB));
 
         // Create a new pool in the factory
         address poolAddress = factory.createPool(address(tokenA), address(tokenB), FEE);
@@ -80,6 +92,51 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback {
         getTokenBalances();
     }
 
+    function testSwap() public {
+        // Step 1: Add liquidity to enable swapping
+        int24 tickLower = -600;
+        int24 tickUpper = 600;
+        uint128 liquidity = 1_000_000;
+
+        (uint256 amount0Added, uint256 amount1Added) = pool.mint(address(this), tickLower, tickUpper, liquidity, '');
+        console.log('Liquidity added. Amount0:', amount0Added, 'Amount1:', amount1Added);
+
+        getTokenBalances();
+
+        // Step 2: Perform a swap
+        uint256 amountSpecified = 1000; // Swap 1000 tokenA for tokenB
+        uint160 sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(-700); // Define a price limit for the swap
+
+        console.log('Before swap:');
+        getPoolState();
+        getTokenBalances();
+
+        uint256 beforeSwapTokenABalance = tokenA.balanceOf(address(this));
+        (int256 amount0, int256 amount1) = pool.swap(
+            address(this), // Recipient
+            true, // zeroForOne: tokenA for tokenB
+            int256(amountSpecified), // Amount specified
+            sqrtPriceLimitX96, // Price limit
+            '' // Callback data
+        );
+
+        console.log('After swap:');
+        console.log('Amount0:', uint256(amount0 < 0 ? -amount0 : amount0));
+        console.log('Amount1:', uint256(amount1 < 0 ? -amount1 : amount1));
+
+        // Step 3: Verify balances and state after swap
+        getPoolState();
+        getTokenBalances();
+
+        assertGt(uint256(amount1), 0, 'Swap should result in a positive amount1');
+        assertEq(
+            tokenA.balanceOf(address(this)),
+            beforeSwapTokenABalance - amountSpecified,
+            'TokenA balance should decrease'
+        );
+        assertGt(tokenB.balanceOf(address(this)), 0, 'TokenB balance should increase');
+    }
+
     function getPoolState() public view returns (uint160 sqrtPriceX96, int24 tick, uint128 liquidity) {
         // Retrieve the slot0 data from the pool
         (sqrtPriceX96, tick, , , , , ) = pool.slot0();
@@ -119,5 +176,24 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback {
         // Log balances after transfer
         console.log('TokenA balance of pool after transfer:', tokenA.balanceOf(address(pool)));
         console.log('TokenB balance of pool after transfer:', tokenB.balanceOf(address(pool)));
+    }
+
+    function uniswapV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata) external override {
+        require(msg.sender == address(pool), 'Invalid callback sender');
+
+        // Log for debugging
+        console.log('Callback invoked with amount0Delta:', amount0Delta);
+        console.log('Callback invoked with amount1Delta:', amount1Delta);
+
+        if (amount0Delta > 0) {
+            tokenA.transfer(msg.sender, uint256(amount0Delta));
+        }
+        if (amount1Delta > 0) {
+            tokenB.transfer(msg.sender, uint256(amount1Delta));
+        }
+
+        // Log balances after swap
+        console.log('TokenA balance of pool after swap:', tokenA.balanceOf(address(pool)));
+        console.log('TokenB balance of pool after swap:', tokenB.balanceOf(address(pool)));
     }
 }
