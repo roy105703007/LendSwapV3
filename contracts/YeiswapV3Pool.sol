@@ -803,6 +803,10 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             uint256 balance0Before = balance0();
             IUniswapV3SwapCallback(msg.sender).uniswapV3SwapCallback(amount0, amount1, data);
             require(balance0Before.add(uint256(amount0)) <= balance0(), 'IIA');
+            // *modify* Deposit token0 from the Vault
+            IERC20(token0).approve(address(vault), uint256(amount0)); // Approve token0 to the Vault
+            vault.depositToken(token0, uint256(amount0)); // Deposit token0 to the Vault
+            //
         } else {
             // *modify* Withdraw from Vault
             uint256 requiredToken0 = amount0 < 0 ? uint256(-amount0) : uint256(amount0);
@@ -813,6 +817,10 @@ contract YeiswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             uint256 balance1Before = balance1();
             IUniswapV3SwapCallback(msg.sender).uniswapV3SwapCallback(amount0, amount1, data);
             require(balance1Before.add(uint256(amount1)) <= balance1(), 'IIA');
+            // *modify* Deposit token1 to the Vault
+            IERC20(token1).approve(address(vault), uint256(amount1)); // Approve token1 to the Vault
+            vault.depositToken(token1, uint256(amount1)); // Deposit token1 to the Vault
+            //
         }
 
         emit Swap(msg.sender, recipient, amount0, amount1, state.sqrtPriceX96, state.liquidity, state.tick);
