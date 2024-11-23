@@ -100,6 +100,8 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
 
         console.log('Before mint:');
 
+        getTickInfo(0);
+        getTickInfo(-20);
         getTickInfo(tickLower);
         getTickInfo(tickUpper);
 
@@ -108,6 +110,8 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
 
         console.log('After mint:');
 
+        getTickInfo(0);
+        getTickInfo(-20);
         getTickInfo(tickLower);
         getTickInfo(tickUpper);
 
@@ -118,6 +122,10 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         uint160 sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(-700); // Define a price limit for the swap
 
         console.log('Before swap:');
+        getTickInfo(0);
+        getTickInfo(-20);
+        getTickInfo(tickLower);
+        getTickInfo(tickUpper);
         getPoolState();
         getTokenBalancesInPool();
 
@@ -133,6 +141,11 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         console.log('After swap:');
         console.log('The delta of the balance of token0 of the pool:', amount0);
         console.log('The delta of the balance of token1 of the pool', amount1);
+
+        getTickInfo(0);
+        getTickInfo(-20);
+        getTickInfo(tickLower);
+        getTickInfo(tickUpper);
 
         // Step 3: Verify balances and state after swap
         getPoolState();
