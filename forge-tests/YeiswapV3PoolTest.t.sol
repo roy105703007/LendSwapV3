@@ -107,8 +107,18 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         int24 tickUpper = 600;
         uint128 liquidity = 1_000_000;
 
+        console.log('Before mint:');
+
+        getTickInfo(tickLower);
+        getTickInfo(tickUpper);
+
         (uint256 amount0Added, uint256 amount1Added) = pool.mint(address(this), tickLower, tickUpper, liquidity, '');
         console.log('Liquidity added. Amount0:', amount0Added, 'Amount1:', amount1Added);
+
+        console.log('After mint:');
+
+        getTickInfo(tickLower);
+        getTickInfo(tickUpper);
 
         getTokenBalancesInPool();
 
@@ -176,6 +186,31 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         // Log the balances for debugging
         console.log('TokenA balance in pool:', balanceTokenA);
         console.log('TokenB balance in pool:', balanceTokenB);
+    }
+
+    function getTickInfo(int24 tick) public view {
+        // Get the information for the given tick
+        (
+            uint128 liquidityGross,
+            int128 liquidityNet,
+            uint256 feeGrowthOutside0X128,
+            uint256 feeGrowthOutside1X128,
+            int56 tickCumulativeOutside,
+            uint160 secondsPerLiquidityOutsideX128,
+            uint32 secondsOutside,
+            bool initialized
+        ) = pool.ticks(tick);
+
+        // Log the tick information
+        console.log('Tick:', tick);
+        console.log('LiquidityGross:', uint256(liquidityGross));
+        console.log('LiquidityNet:', int256(liquidityNet));
+        console.log('FeeGrowthOutside0X128:', feeGrowthOutside0X128);
+        console.log('FeeGrowthOutside1X128:', feeGrowthOutside1X128);
+        console.log('TickCumulativeOutside:', tickCumulativeOutside);
+        console.log('SecondsPerLiquidityOutsideX128:', uint256(secondsPerLiquidityOutsideX128));
+        console.log('SecondsOutside:', uint256(secondsOutside));
+        console.log('Initialized:', initialized);
     }
 
     function uniswapV3MintCallback(uint256 amount0Owed, uint256 amount1Owed, bytes calldata) external override {
