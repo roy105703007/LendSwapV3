@@ -160,6 +160,86 @@ contract UniswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         assertGt(tokenB.balanceOf(address(this)), 0, 'TokenB balance should increase');
     }
 
+    function testCrossTickSwap() public {
+        // Step 1: Add liquidity in two different ranges
+
+        int24 tickLower1 = -60;
+        int24 tickUpper1 = 60;
+        uint128 liquidity1 = 7_000;
+
+        int24 tickLower2 = -600;
+        int24 tickUpper2 = -480;
+        uint128 liquidity2 = 500_000;
+
+        console.log('Before adding liquidity for range 1:');
+        getTickInfo(tickLower1);
+        getTickInfo(tickUpper1);
+
+        (uint256 amount0Added1, uint256 amount1Added1) = pool.mint(
+            address(this),
+            tickLower1,
+            tickUpper1,
+            liquidity1,
+            ''
+        );
+        console.log('Liquidity added for range 1. Amount0:', amount0Added1, 'Amount1:', amount1Added1);
+
+        console.log('After adding liquidity for range 1:');
+        getTickInfo(tickLower1);
+        getTickInfo(tickUpper1);
+
+        console.log('Before adding liquidity for range 2:');
+        getTickInfo(tickLower2);
+        getTickInfo(tickUpper2);
+
+        (uint256 amount0Added2, uint256 amount1Added2) = pool.mint(
+            address(this),
+            tickLower2,
+            tickUpper2,
+            liquidity2,
+            ''
+        );
+        console.log('Liquidity added for range 2. Amount0:', amount0Added2, 'Amount1:', amount1Added2);
+
+        console.log('After adding liquidity for range 2:');
+        getTickInfo(tickLower2);
+        getTickInfo(tickUpper2);
+
+        // Step 2: Perform a swap that crosses multiple ticks
+        uint256 amountSpecified = 1500; // Swap 1500 tokenA for tokenB
+        uint160 sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(-900); // Define a price limit for the swap
+
+        console.log('Before swap:');
+        getTickInfo(tickLower1);
+        getTickInfo(tickUpper1);
+        getTickInfo(tickLower2);
+        getTickInfo(tickUpper2);
+        getPoolState();
+        getTokenBalancesInPool();
+
+        (int256 amount0Delta, int256 amount1Delta) = pool.swap(
+            address(this), // Recipient
+            true, // zeroForOne: tokenA for tokenB
+            int256(amountSpecified), // Amount specified
+            sqrtPriceLimitX96, // Price limit
+            '' // Callback data
+        );
+
+        console.log('After swap:');
+        console.log('Amount0Delta (TokenA):', uint256(amount0Delta > 0 ? amount0Delta : -amount0Delta));
+        console.log('Amount1Delta (TokenB):', uint256(amount1Delta > 0 ? amount1Delta : -amount1Delta));
+
+        getTickInfo(tickLower1);
+        getTickInfo(tickUpper1);
+        getTickInfo(tickLower2);
+        getTickInfo(tickUpper2);
+        getPoolState();
+        getTokenBalancesInPool();
+
+        // Verify the swap affected both ranges
+        assertGt(uint256(amount1Delta), 0, 'Swap should result in a positive amount of TokenB');
+    }
+
     function getPoolState() public view returns (uint160 sqrtPriceX96, int24 tick, uint128 liquidity) {
         // Retrieve the slot0 data from the pool
         (sqrtPriceX96, tick, , , , , ) = pool.slot0();
