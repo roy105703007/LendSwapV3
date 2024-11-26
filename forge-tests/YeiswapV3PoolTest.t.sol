@@ -109,20 +109,20 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
 
         console.log('Before mint:');
 
-        getTickInfo(0);
-        getTickInfo(-20);
-        getTickInfo(tickLower);
-        getTickInfo(tickUpper);
+        // getTickInfo(0);
+        // getTickInfo(-20);
+        // getTickInfo(tickLower);
+        // getTickInfo(tickUpper);
 
         (uint256 amount0Added, uint256 amount1Added) = pool.mint(address(this), tickLower, tickUpper, liquidity, '');
         console.log('Liquidity added. Amount0:', amount0Added, 'Amount1:', amount1Added);
 
         console.log('After mint:');
 
-        getTickInfo(0);
-        getTickInfo(-20);
-        getTickInfo(tickLower);
-        getTickInfo(tickUpper);
+        // getTickInfo(0);
+        // getTickInfo(-20);
+        // getTickInfo(tickLower);
+        // getTickInfo(tickUpper);
 
         getTokenBalancesInPool();
 
@@ -131,13 +131,13 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         uint160 sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(-700); // Define a price limit for the swap
 
         console.log('Before swap:');
-        getTickInfo(0);
-        getTickInfo(-20);
-        getTickInfo(tickLower);
-        getTickInfo(tickUpper);
+        // getTickInfo(0);
+        // getTickInfo(-20);
+        // getTickInfo(tickLower);
+        // getTickInfo(tickUpper);
         getPoolState();
-        getVaultState();
         getTokenBalancesInPool();
+        getVaultState();
 
         uint256 beforeSwapTokenABalance = tokenA.balanceOf(address(this));
         (int256 amount0, int256 amount1) = pool.swap(
@@ -152,14 +152,15 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         console.log('The delta of the balance of token0 of the pool:', amount0);
         console.log('The delta of the balance of token1 of the pool', amount1);
 
-        getTickInfo(0);
-        getTickInfo(-20);
-        getTickInfo(tickLower);
-        getTickInfo(tickUpper);
+        // getTickInfo(0);
+        // getTickInfo(-20);
+        // getTickInfo(tickLower);
+        // getTickInfo(tickUpper);
 
         // Step 3: Verify balances and state after swap
         getPoolState();
         getTokenBalancesInPool();
+        getVaultState();
 
         assertGt(uint256(amount1), 0, 'Swap should result in a positive amount1');
         assertEq(
@@ -182,8 +183,8 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         uint128 liquidity2 = 500_000;
 
         console.log('Before adding liquidity for range 1:');
-        getTickInfo(tickLower1);
-        getTickInfo(tickUpper1);
+        // getTickInfo(tickLower1);
+        // getTickInfo(tickUpper1);
 
         (uint256 amount0Added1, uint256 amount1Added1) = pool.mint(
             address(this),
@@ -195,12 +196,12 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         console.log('Liquidity added for range 1. Amount0:', amount0Added1, 'Amount1:', amount1Added1);
 
         console.log('After adding liquidity for range 1:');
-        getTickInfo(tickLower1);
-        getTickInfo(tickUpper1);
+        // getTickInfo(tickLower1);
+        // getTickInfo(tickUpper1);
 
         console.log('Before adding liquidity for range 2:');
-        getTickInfo(tickLower2);
-        getTickInfo(tickUpper2);
+        // getTickInfo(tickLower2);
+        // getTickInfo(tickUpper2);
 
         (uint256 amount0Added2, uint256 amount1Added2) = pool.mint(
             address(this),
@@ -212,18 +213,18 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         console.log('Liquidity added for range 2. Amount0:', amount0Added2, 'Amount1:', amount1Added2);
 
         console.log('After adding liquidity for range 2:');
-        getTickInfo(tickLower2);
-        getTickInfo(tickUpper2);
+        // getTickInfo(tickLower2);
+        // getTickInfo(tickUpper2);
 
         // Step 2: Perform a swap that crosses multiple ticks
         uint256 amountSpecified = 1500; // Swap 1500 tokenA for tokenB
         uint160 sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(-900); // Define a price limit for the swap
 
         console.log('Before swap:');
-        getTickInfo(tickLower1);
-        getTickInfo(tickUpper1);
-        getTickInfo(tickLower2);
-        getTickInfo(tickUpper2);
+        // getTickInfo(tickLower1);
+        // getTickInfo(tickUpper1);
+        // getTickInfo(tickLower2);
+        // getTickInfo(tickUpper2);
         getPoolState();
         getTokenBalancesInPool();
         getVaultState();
@@ -240,10 +241,10 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
         console.log('Amount0Delta (TokenA):', uint256(amount0Delta > 0 ? amount0Delta : -amount0Delta));
         console.log('Amount1Delta (TokenB):', uint256(amount1Delta > 0 ? amount1Delta : -amount1Delta));
 
-        getTickInfo(tickLower1);
-        getTickInfo(tickUpper1);
-        getTickInfo(tickLower2);
-        getTickInfo(tickUpper2);
+        // getTickInfo(tickLower1);
+        // getTickInfo(tickUpper1);
+        // getTickInfo(tickLower2);
+        // getTickInfo(tickUpper2);
         getPoolState();
         getTokenBalancesInPool();
         getVaultState();
