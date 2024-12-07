@@ -1,9 +1,9 @@
 [profile.default]
-src = "./contracts"      # 指定 Foundry 使用 Hardhat 的 contracts 資料夾
-test = "./forge-tests"   # Foundry 測試放在單獨目錄
-out = "./out"            # 編譯輸出
+src = "./contracts"      
+test = "./forge-tests"   
+out = "./out"            
 libs = ["./lib", "./node_modules"]
-solc_version = "0.7.6"     # Solidity 編譯器版本
+solc_version = "0.7.6"     
 
 [rpc_endpoints]
 mainnet = "https://mainnet.infura.io/v3/YOUR_INFURA_API_KEY"
@@ -13,5 +13,5 @@ rinkeby = "https://rinkeby.infura.io/v3/YOUR_INFURA_API_KEY"
 ropsten = "https://ropsten.infura.io/v3/YOUR_INFURA_API_KEY"
 arbitrum = "https://arbitrum-mainnet.infura.io/v3/YOUR_INFURA_API_KEY"
 arbitrum_sepolia = "https://sepolia-rollup.arbitrum.io/rpc/"
-
+sei = "https://sei-chain-node-url" 
 

@@ -3,16 +3,21 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 
-import * as dotenv from "dotenv";
+import * as dotenv from 'dotenv'
 
 // Load environment variables
-dotenv.config();
+dotenv.config()
 
-const signerAccounts = process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [];
+const signerAccounts = process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
 
 export default {
   networks: {
-    "arbitrum-sepolia": {
+    sei: {
+      url: `https://evm-rpc-testnet.sei-apis.com`,
+      chainId: 1328,
+      accounts: signerAccounts,
+    },
+    'arbitrum-sepolia': {
       url: `https://sepolia-rollup.arbitrum.io/rpc/`,
       chainId: 421614,
       accounts: signerAccounts,
@@ -59,15 +64,15 @@ export default {
   },
   etherscan: {
     apiKey: {
-      "arbitrum-sepolia": process.env.ARBISCAN_API_KEY || "",
+      'arbitrum-sepolia': process.env.ARBISCAN_API_KEY || '',
     },
     customChains: [
       {
-        network: "arbitrum-sepolia",
+        network: 'arbitrum-sepolia',
         chainId: 421614, // Replace with the correct chainId for the "opbnb" network
         urls: {
-          apiURL: "https://api-sepolia.arbiscan.io/api",
-          browserURL: "https://sepolia.arbiscan.io/",
+          apiURL: 'https://api-sepolia.arbiscan.io/api',
+          browserURL: 'https://sepolia.arbiscan.io/',
         },
       },
     ],
