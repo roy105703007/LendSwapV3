@@ -9,10 +9,11 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 const signerAccounts = process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+const seitraceKey = process.env.SEITRACE_KEY || ''
 
 export default {
   networks: {
-    sei: {
+    sei_atlantic_2: {
       url: `https://evm-rpc-testnet.sei-apis.com`,
       chainId: 1328,
       accounts: signerAccounts,
@@ -64,15 +65,15 @@ export default {
   },
   etherscan: {
     apiKey: {
-      'arbitrum-sepolia': process.env.ARBISCAN_API_KEY || '',
+      sei_atlantic_2: seitraceKey,
     },
     customChains: [
       {
-        network: 'arbitrum-sepolia',
-        chainId: 421614, // Replace with the correct chainId for the "opbnb" network
+        network: 'sei_atlantic_2',
+        chainId: 1328,
         urls: {
-          apiURL: 'https://api-sepolia.arbiscan.io/api',
-          browserURL: 'https://sepolia.arbiscan.io/',
+          apiURL: 'https://seitrace.com/atlantic-2/api',
+          browserURL: 'https://seitrace.com',
         },
       },
     ],
