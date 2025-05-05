@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Vault {
     // Mapping for whitelisted addresses
@@ -9,7 +10,7 @@ contract Vault {
 
     // Modifier: only the contract owner can call
     modifier onlyOwner() {
-        require(msg.sender == owner, 'Not owner');
+        require(msg.sender == owner, "Not owner");
         _;
     }
 
@@ -25,8 +26,8 @@ contract Vault {
     /// @param token Address of the token to deposit
     /// @param amount Amount of tokens to deposit
     function depositToken(address token, uint256 amount) external {
-        require(amount > 0, 'Invalid amount');
-        require(IERC20(token).transferFrom(msg.sender, address(this), amount), 'Deposit failed');
+        require(amount > 0, "Invalid amount");
+        require(IERC20(token).transferFrom(msg.sender, address(this), amount), "Deposit failed");
     }
 
     /// @notice Withdraw ERC20 tokens
@@ -34,25 +35,25 @@ contract Vault {
     /// @param recipient Address to receive the tokens
     /// @param amount Amount of tokens to withdraw
     function withdrawToken(address token, address recipient, uint256 amount) external {
-        require(amount > 0, 'Invalid amount');
-        require(recipient != address(0), 'Invalid recipient');
-        require(IERC20(token).transfer(recipient, amount), 'Withdraw failed');
+        require(amount > 0, "Invalid amount");
+        require(recipient != address(0), "Invalid recipient");
+        require(IERC20(token).transfer(recipient, amount), "Withdraw failed");
     }
 
     /// @notice Deposit ETH
     function depositETH() external payable {
-        require(msg.value > 0, 'No ETH sent');
+        require(msg.value > 0, "No ETH sent");
     }
 
     /// @notice Withdraw ETH
     /// @param recipient Address to receive the ETH
     /// @param amount Amount of ETH to withdraw
     function withdrawETH(address recipient, uint256 amount) external {
-        require(amount > 0, 'Invalid amount');
-        require(recipient != address(0), 'Invalid recipient');
-        require(address(this).balance >= amount, 'Insufficient ETH balance');
-        (bool success, ) = recipient.call{value: amount}('');
-        require(success, 'Withdraw failed');
+        require(amount > 0, "Invalid amount");
+        require(recipient != address(0), "Invalid recipient");
+        require(address(this).balance >= amount, "Insufficient ETH balance");
+        (bool success,) = recipient.call{value: amount}("");
+        require(success, "Withdraw failed");
     }
 
     // /// @notice Add an address to the whitelist
@@ -72,7 +73,7 @@ contract Vault {
     /// @notice Update the contract owner
     /// @param newOwner Address of the new owner
     function updateOwner(address newOwner) external onlyOwner {
-        require(newOwner != address(0), 'Invalid address');
+        require(newOwner != address(0), "Invalid address");
         owner = newOwner;
         whitelist[newOwner] = true; // Ensure the new owner is in the whitelist
     }
