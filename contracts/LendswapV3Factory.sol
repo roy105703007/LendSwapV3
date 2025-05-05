@@ -3,14 +3,14 @@ pragma solidity =0.7.6;
 
 import './interfaces/IUniswapV3Factory.sol';
 
-import './YeiswapV3PoolDeployer.sol';
+import './LendswapV3PoolDeployer.sol';
 import './NoDelegateCall.sol';
 
-import './YeiswapV3Pool.sol';
+import './LendswapV3Pool.sol';
 
 /// @title Canonical Uniswap V3 factory
 /// @notice Deploys Uniswap V3 pools and manages ownership and control over pool protocol fees
-contract YeiswapV3Factory is IUniswapV3Factory, YeiswapV3PoolDeployer, NoDelegateCall {
+contract LendswapV3Factory is IUniswapV3Factory, LendswapV3PoolDeployer, NoDelegateCall {
     /// @inheritdoc IUniswapV3Factory
     address public override owner;
 

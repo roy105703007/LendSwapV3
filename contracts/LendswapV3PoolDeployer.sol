@@ -3,9 +3,9 @@ pragma solidity =0.7.6;
 
 import './interfaces/IUniswapV3PoolDeployer.sol';
 
-import './YeiswapV3Pool.sol';
+import './LendswapV3Pool.sol';
 
-contract YeiswapV3PoolDeployer is IUniswapV3PoolDeployer {
+contract LendswapV3PoolDeployer is IUniswapV3PoolDeployer {
     struct Parameters {
         address factory;
         address token0;
@@ -32,7 +32,7 @@ contract YeiswapV3PoolDeployer is IUniswapV3PoolDeployer {
         int24 tickSpacing
     ) internal returns (address pool) {
         parameters = Parameters({factory: factory, token0: token0, token1: token1, fee: fee, tickSpacing: tickSpacing});
-        pool = address(new YeiswapV3Pool{salt: keccak256(abi.encode(token0, token1, fee))}());
+        pool = address(new LendswapV3Pool{salt: keccak256(abi.encode(token0, token1, fee))}());
         delete parameters;
     }
 }

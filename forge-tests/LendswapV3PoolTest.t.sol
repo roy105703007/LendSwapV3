@@ -3,15 +3,15 @@ pragma solidity ^0.7.6;
 pragma abicoder v2;
 
 import 'forge-std/Test.sol';
-import '../contracts/YeiswapV3Factory.sol';
-import '../contracts/YeiswapV3Pool.sol';
+import '../contracts/LendswapV3Factory.sol';
+import '../contracts/LendswapV3Pool.sol';
 import '../contracts/MockERC20.sol';
 import '../contracts/libraries/TickMath.sol';
 import '../contracts/Vault.sol';
 
-contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallback {
-    YeiswapV3Factory public factory;
-    YeiswapV3Pool public pool;
+contract LendswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallback {
+    LendswapV3Factory public factory;
+    LendswapV3Pool public pool;
     MockERC20 public tokenA;
     MockERC20 public tokenB;
     Vault public vault;
@@ -21,8 +21,8 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
     uint256 public constant INITIAL_SUPPLY = 1_000_000 * 1e18;
 
     function setUp() public {
-        // Deploy the YeiswapV3Factory contract
-        factory = new YeiswapV3Factory();
+        // Deploy the LendswapV3Factory contract
+        factory = new LendswapV3Factory();
 
         // Deploy the Vault contract
         vault = new Vault();
@@ -46,7 +46,7 @@ contract YeiswapV3PoolTest is Test, IUniswapV3MintCallback, IUniswapV3SwapCallba
 
         // Create a new pool in the factory
         address poolAddress = factory.createPool(address(tokenA), address(tokenB), FEE);
-        pool = YeiswapV3Pool(poolAddress);
+        pool = LendswapV3Pool(poolAddress);
 
         // Initialize the pool with the starting sqrt price
         pool.initialize(INITIAL_SQRT_PRICE_X96);
